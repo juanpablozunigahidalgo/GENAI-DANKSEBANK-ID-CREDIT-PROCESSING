@@ -1,0 +1,33 @@
+Senior GenAI Specialist - Credit Journey OCB AI acceleration
+
+Danske Bank is embarking on a brand-new exciting journey to transform credit processing through agentic Generative AI solutions. We, in Credit Journey tribe, are looking for a GenAI Specialist to spearhead this effort.
+
+Welcome to our Tribe!
+
+You will become part of our Tribe, where your role will be to utilise the game changing GenAI techs for next generation credit solution development, bridge strategy and hands-on practice while ensuring compliance within the highly regulated banking sector, while having close collaboration with our 25 squads in our tribe.
+
+We are on a journey to create a unified, plug-and-play credit process that can hook into all our channels. We have a data-driven approach for creating near-instant, automated credit decisions, that work seamlessly with our advisory solutions. Leveraging the power of the data and GenAI, our mission is to enable customers to realise their dreams and ambitions with trusted and frictionless credit decisions in any channel and journey.
+
+Your responsibilities
+
+Lead the design and development of agentic GenAI solutions using AWS AI/ML services.
+Implement and operationalize MCPs (Model Context Protocols) for scalable AI.
+Drive AWS platform engineering efforts, ensuring security, compliance, and performance.
+Build containerized AI solutions (Docker, Kubernetes/EKS).
+Collaborate with compliance and business teams to align innovation with regulation.
+Mentor colleagues and establish best practices in GenAI engineering.
+What we are looking for
+
+Proven expertise in Generative AI and agentic AI architectures.
+Strong experience with AWS AI services (SageMaker, Bedrock) and cloud engineering.
+Familiarity with containerized solutions and orchestration (Docker, Kubernetes/EKS).
+Proficiency in Java (backend), React (frontend), and Python (data).
+Understanding of compliance, ethics, and risk management in regulated industries.
+Business process / workflow understanding; banking experience is a plus.
+What we offer
+
+A pioneering role in defining AI adoption at Danske Bank.
+The opportunity to build solutions from scratch in a critical business area.
+Collaboration across engineering, compliance, and business units.
+A modern workplace in Copenhagen, Denmark with opportunities for continuous learning.
+As a colleague at Danske Bank you will experience very committed in a collaborative work environment that values innovation and career development. We offer you an attractive salary package and highly attractive benefits including pension and health care insurance. We are located in our newly built domicile on Postgrunden next to Copenhagen Central Station.
