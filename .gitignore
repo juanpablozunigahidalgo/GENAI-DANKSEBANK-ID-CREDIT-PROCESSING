@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.pyo
+
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Logs and local database
+*.log
+*.sqlite3
+
+# Python tooling
+.mypy_cache/
+.pytest_cache/
+coverage.xml
+htmlcov/
+.tox/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Mac / Windows system files
+.DS_Store
+Thumbs.db
+
+# Environments and Secrets
+.env
+.env.*.local
