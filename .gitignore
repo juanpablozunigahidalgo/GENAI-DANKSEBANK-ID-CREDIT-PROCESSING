@@ -1,37 +1,76 @@
-# Byte-compiled / optimized / DLL files
+# ====================================
+# 🧠 PYTHON BUILD / CACHE
+# ====================================
 __pycache__/
 *.py[cod]
 *.so
 *.pyd
 *.pyo
 
-# Virtual environments
+# ====================================
+# 🧩 VIRTUAL ENVIRONMENTS
+# ====================================
 venv/
-.env/
 .venv/
+ENV/
+env/
 
-# VS Code
+# ====================================
+# 🔐 ENVIRONMENT VARIABLES / SECRETS
+# ====================================
+.env
+.env.*
+.env.local
+.env.*.local
+
+# ====================================
+# 🧰 VS CODE / EDITOR CONFIGS
+# ====================================
 .vscode/
 *.code-workspace
 
-# Logs and local database
+# ====================================
+# 🧾 LOGS / TEMPORAL FILES
+# ====================================
 *.log
 *.sqlite3
+*.db
+*.pid
 
-# Python tooling
+# ====================================
+# ⚙️ PYTHON TOOLS / TESTING
+# ====================================
 .mypy_cache/
 .pytest_cache/
 coverage.xml
 htmlcov/
 .tox/
 
-# Jupyter Notebook checkpoints
+# ====================================
+# 📓 JUPYTER NOTEBOOK CHECKPOINTS
+# ====================================
 .ipynb_checkpoints/
 
-# Mac / Windows system files
+# ====================================
+# 💻 SYSTEM FILES
+# ====================================
 .DS_Store
 Thumbs.db
 
-# Environments and Secrets
-.env
-.env.*.local
+# ====================================
+# 🧩 BUILD / DIST
+# ====================================
+build/
+dist/
+*.egg-info/
+*.egg
+
+# ====================================
+# 📦 NODE / FRONTEND
+# ====================================
+node_modules/
+frontend/build/
+frontend/dist/
+frontend/.next/
+frontend/.nuxt/
+frontend/.cache/

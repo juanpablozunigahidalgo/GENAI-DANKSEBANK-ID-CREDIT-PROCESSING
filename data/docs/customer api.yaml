@@ -1,0 +1,200 @@
+swagger: '2.0'
+info:
+  description: Customer systems onboarding API
+  title: customer-api
+  version: 1.0.0
+basePath: /
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+security:
+  - clientSecretHeader: []
+    clientIdHeader: []
+paths:
+  /customers/personal:
+    post:
+      description: Create Personal Customer
+      summary: Create Personal Customer
+      operationId: createPersonalCustomer
+      tags:
+        - Customer
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          description: JWT token for authentication
+          type: string
+        - name: body
+          in: body
+          schema:
+            $ref: '#/definitions/CreatePersonalCustomerRequestDto'
+          required: true
+      responses:
+        '202':
+          description: Accepted
+          schema:
+            $ref: '#/definitions/CreateCustomerResponseDto'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '409':
+          description: Conflict
+definitions:
+  AddressDto:
+    type: array
+    items:
+      type: object
+      properties:
+        streetName:
+          type: string
+          description: The name of the street, road, avenue, way, etc. to which the number of the building is attached
+          example: Tokkerupvej
+        houseNumber:
+          type: string
+          description: House number on a street
+          example: '35'
+        floor:
+          type: string
+          description: An identifiable floor of a building
+          example: 1st
+        side:
+          type: string
+          description: The side on the floor a room or apartment is on
+          example: TV
+        room:
+          type: string
+          description: An identifiable room, suite, or apartment of a building
+          example: '22'
+        postalZone:
+          type: string
+          description: The postal identifier for this address according to the relevant national postal service, such as a ZIP code or Post Code
+          example: '2730'
+        cityName:
+          type: string
+          description: The name of a city, town or village
+          example: Herlev
+        country:
+          $ref: '#/definitions/CountryDto'
+        language:
+          $ref: '#/definitions/LanguageDto'
+        primary:
+          type: boolean
+          description: Is this address primary
+          example: false
+        preferred:
+          type: boolean
+          description: Is this address preferred
+          example: false
+  ContactInformationDto:
+    type: object
+    required:
+      - address
+    properties:
+      address:
+        $ref: '#/definitions/AddressDto'
+  CountryCode:
+    type: string
+    minLength: 2
+    maxLength: 2
+    description: Two-character ISO Country code
+    example: dk
+  CountryDto:
+    type: object
+    required:
+      - code
+    properties:
+      code:
+        $ref: '#/definitions/CountryCode'
+  CreateCustomerResponseDto:
+    type: object
+    description: Request was successfully received and will be processed as soon as possible.
+    required:
+      - customerKey
+    properties:
+      customerKey:
+        type: string
+        minLength: 36
+        maxLength: 36
+        description: Unique identification of the Customer
+        example: a4906ded-ec01-4317-ab38-782f49677856
+  CreatePersonalCustomerRequestDto:
+    type: object
+    description: Information required to create a Personal Customer
+    required:
+      - identity
+    properties:
+      identity:
+        $ref: '#/definitions/PersonalIdentityDto'
+      contactInformation:
+        $ref: '#/definitions/ContactInformationDto'
+  ExternalCustomerKeyDto:
+    type: object
+    required:
+      - key
+      - type
+    properties:
+      key:
+        type: string
+        description: Key that identifies the Customer towards National Authorities
+        example: '1304802151'
+      type:
+        type: string
+        description: |
+          Indication of the type of key.
+          i.e. 
+          ConstructedPersonal, DanishPersonal, DanishConstructedPersonalNonCustomer, SwedishPersonal, SwedishConstructedPersonal, NorwegianPersonal, FinnishPersonal, PolishPersonal, PolishConstructedPersonal, EstonianPersonal, LatvianPersonal, LithuanianPersonal, LuxembourgConstructedPersonal, ConstructedCorporate, DanishCorporate, SwedishCorporate, SwedishConstructedCorporate, NorwegianConstructedCorporate, NorwegianCorporate, FinnishCorporate, PolishCorporateKRS, PolishCorporateREGON, PolishConstructedCorporate, PolishCorporateTax, EstonianCorporate, LatvianCorporate, LithuanianCorporate, LuxembourgConstructedCorporate, DanishPersonalAlternatePhone, SwedishPersonalPassedAway
+        example: DanishPersonal
+  LanguageDto:
+    type: object
+    required:
+      - code
+    properties:
+      code:
+        type: string
+        minLength: 2
+        maxLength: 2
+        description: Two-character ISO Language code
+        example: dk
+      description:
+        type: string
+        description: The ISO name of a language
+        example: Danish
+  PersonalCustomerNameDto:
+    type: object
+    required:
+      - firstName
+      - lastName
+    properties:
+      firstName:
+        type: string
+        minLength: 1
+        maxLength: 30
+        description: First name of the Customer
+        example: Donald
+      lastName:
+        type: string
+        minLength: 1
+        maxLength: 34
+        description: Last name of the Customer
+        example: Duck
+  PersonalIdentityDto:
+    type: object
+    required:
+      - externalCustomerKey
+    properties:
+      externalCustomerKey:
+        $ref: '#/definitions/ExternalCustomerKeyDto'
+      name:
+        $ref: '#/definitions/PersonalCustomerNameDto'

@@ -1,20 +1,36 @@
-from langchain.chat_models import ChatOpenAI
-from langchain.agents import initialize_agent, Tool
-from langchain.agents.agent_types import AgentType
+from pathlib import Path
+from dotenv import load_dotenv  # ✅ para leer variables desde .env
+from langchain.vectorstores import FAISS
+from langchain_openai import OpenAIEmbeddings
 
-from backend.utils.tools import get_user_data_tool
+from backend.utils.document_utils import load_documents_from_folder, split_documents
 
-def setup_agent(memory):
-    llm = ChatOpenAI(temperature=0)
-    tools = [get_user_data_tool]
+# 🔹 Cargar variables de entorno (.env)
+load_dotenv()
 
-    agent_executor = initialize_agent(
-        tools=tools,
-        llm=llm,
-        agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION,
-        memory=memory,
-        handle_parsing_errors=True,
-        verbose=True
-    )
+FAISS_DIR = Path("data/faiss")
 
-    return agent_executor
+# cache en memoria para no cargar FAISS en cada request
+_vectorstore_cache = None
+
+def build_vectorstore():
+    """Leer PDFs, trocearlos y crear/sobre-escribir FAISS en disco."""
+    docs = load_documents_from_folder()
+    chunks = split_documents(docs)
+    embeddings = OpenAIEmbeddings()  # Usará OPENAI_API_KEY desde .env
+    vs = FAISS.from_documents(chunks, embeddings)
+    FAISS_DIR.mkdir(parents=True, exist_ok=True)
+    vs.save_local(str(FAISS_DIR))
+    return vs
+
+def load_vectorstore():
+    """Cargar FAISS desde disco (con cache en memoria)."""
+    global _vectorstore_cache
+    if _vectorstore_cache is None:
+        embeddings = OpenAIEmbeddings()
+        _vectorstore_cache = FAISS.load_local(
+            str(FAISS_DIR),
+            embeddings,
+            allow_dangerous_deserialization=True
+        )
+    return _vectorstore_cache
