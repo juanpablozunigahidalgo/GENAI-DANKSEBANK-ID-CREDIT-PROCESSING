@@ -15,6 +15,6 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(chat.router)
-app.include_router(customer.router)
+app.include_router(customer.router)      
 app.include_router(cpr_registry.router)
 app.include_router(upload_id.router)
