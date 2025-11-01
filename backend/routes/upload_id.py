@@ -3,9 +3,9 @@ from fastapi import APIRouter, File, UploadFile, Query
 from fastapi.responses import JSONResponse
 import uuid
 from pathlib import Path
+import httpx
 
 from backend.utils.tools import UPLOADED_IDS
-from backend.services.id_verification.engine import verify_identity  # 👈 explicit import
 
 router = APIRouter(prefix="/upload-id", tags=["default"])
 UPLOAD_DIR = Path("data/uploads")
@@ -16,7 +16,6 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 async def upload_id_file(
     file: UploadFile = File(...),
     user_id: str = Query(..., description="Same user_id used in /chat"),
-    simulate: str = Query(None, description="force approve/reject for POC"),
 ):
     # 1) save file
     file_id = str(uuid.uuid4())
@@ -24,43 +23,72 @@ async def upload_id_file(
     with open(save_path, "wb") as buffer:
         buffer.write(await file.read())
 
-    # 2) mock OCR result
+    # 2) OCR mock (realistic, like the CPR DB)
     parsed_id = {
-        "first_name": "John",
-        "last_name": "Doe",
+        "firstName": "John",
+        "lastName": "Doe",
+        "dateOfBirth": "1985-04-12",
+        "gender": "male",
+        "address": "POC Street 1, 2100 Copenhagen",
+        "maritalStatus": "married",
+        "citizenship": ["Denmark"],
         "national_id": "123456-7890",
         "country": "Denmark",
-        "status": "Verified",
+
+        # snake_case for agent compatibility
+        "first_name": "John",
+        "last_name": "Doe",
+
         "file_path": str(save_path),
     }
 
-    # 3) call independent verification engine
-    verification_result = verify_identity(
-        parsed_id.get("national_id", ""),
-        parsed_id.get("country", "Denmark"),
-    )
+    national_id = parsed_id["national_id"]
+    country = parsed_id["country"]
 
-    # 4) allow manual override
-    if simulate:
-        if simulate.lower() == "approve":
-            verification_result["status"] = "approved"
-            verification_result["reason"] = "Simulated approval (forced)."
-        elif simulate.lower() == "reject":
+    # 3) call central registry API (same app)
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(
+            "http://127.0.0.1:8000/registry/",
+            params={"national_id": national_id, "country": country},
+        )
+    registry_resp = resp.json()
+
+    # 4) map registry response -> internal "verification" structure
+    # so the agent sees the SAME shape as before
+    if registry_resp.get("status") == "found":
+        verification_result = {
+            "status": "approved",
+            "reason": registry_resp.get("message", "Found in national registry."),
+            "registry_record": registry_resp.get("registry_record") or {},
+            "source": registry_resp.get("source") or country.lower(),
+        }
+    else:
+        verification_result = {
+            "status": "rejected",
+            "reason": registry_resp.get("message", "Not found in national registry."),
+            "registry_record": None,
+            "source": registry_resp.get("source") or country.lower(),
+        }
+
+    # 5) extra safety: OCR ID must match registry ID
+    registry_id = (verification_result.get("registry_record") or {}).get("national_id")
+    if verification_result["status"] == "approved":
+        if not registry_id or registry_id != national_id:
             verification_result["status"] = "rejected"
-            verification_result["reason"] = "Simulated rejection (forced)."
+            verification_result["reason"] = "ID mismatch between OCR and national registry."
 
-    # 5) store for agent
+    # 6) store FULL object for the agent
     UPLOADED_IDS[user_id] = {
         **parsed_id,
         "verification": verification_result,
     }
 
-    # 6) return to caller
+    # 7) return short response to client
     return JSONResponse(
         content={
             "upload_status": "success",
             "user_id": user_id,
-            "parsed_id": parsed_id,
-            "verification": verification_result,
+            "parsed_id": parsed_id,              # puedes quitarlo si lo quieres corto
+            "verification": verification_result, # el agente espera esto
         }
     )

@@ -1,33 +1,3 @@
 [
-  {
-    "first_name": "John",
-    "last_name": "Doe",
-    "national_id": "123456-7890",
-    "country": "Denmark",
-    "status": "Verified",
-    "file_path": "data\\uploads\\7c49fe28-b388-465f-8cec-79a680426f94_ID.jpg",
-    "email": "john.doe@danskebank.credit.com",
-    "registered_user_id": "string"
-  },
-  {
-    "first_name": "John",
-    "last_name": "Doe",
-    "national_id": "123456-7890",
-    "country": "Denmark",
-    "status": "Verified",
-    "file_path": "data\\uploads\\4f662114-4975-4afd-9580-de69bf0fa6be_ID.jpg",
-    "verification": {
-      "status": "approved",
-      "reason": "Matched Danish CPR (POC).",
-      "registry_record": {
-        "first_name": "John",
-        "last_name": "Doe",
-        "address": "POC Street 1, Copenhagen",
-        "citizenship": "Denmark"
-      },
-      "source": "denmark"
-    },
-    "email": "john.doe@danskebank.credit.com",
-    "registered_user_id": "string"
-  }
+  
 ]

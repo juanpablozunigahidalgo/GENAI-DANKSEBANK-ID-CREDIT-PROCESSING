@@ -7,13 +7,6 @@ router = APIRouter(prefix="/customer", tags=["customer"])
 
 DB_FILE = Path("data/customers.json")
 
-
-@router.post("/")
-def create_customer():
-    # future: call real customer API
-    return {"message": "Customer created (mocked)."}
-
-
 @router.get("/all")
 def list_customers():
     """Return all customers saved by the onboarding agent (POC)."""

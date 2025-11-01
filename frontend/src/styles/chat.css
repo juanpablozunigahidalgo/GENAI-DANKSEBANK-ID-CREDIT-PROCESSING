@@ -1,0 +1,151 @@
+.chat-widget {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  width: 360px;
+  background: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-widget:not(.open) {
+  height: auto;
+}
+
+.chat-header {
+  background: #0b5fa5;
+  color: #fff;
+  padding: 0.7rem 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  gap: 0.5rem;
+}
+
+.chat-header strong {
+  font-size: 0.9rem;
+}
+
+.chat-subtitle {
+  font-size: 0.68rem;
+  opacity: 0.9;
+}
+
+.chat-toggle-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.chat-body {
+  display: flex;
+  flex-direction: column;
+  height: 420px;
+  background: #f6f7f9;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 0.7rem;
+  overflow-y: auto;
+  gap: 0.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-msg {
+  padding: 0.45rem 0.7rem;
+  border-radius: 0.6rem;
+  max-width: 90%;
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+
+.chat-msg.agent {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  align-self: flex-start;
+}
+
+.chat-msg.user {
+  background: #0b5fa5;
+  color: #fff;
+  align-self: flex-end;
+}
+
+.chat-input {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  background: #fff;
+  border-top: 1px solid #e7e7e7;
+}
+
+.chat-input input {
+  flex: 1;
+  border: 1px solid #d0d0d0;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.chat-input button {
+  background: #0b5fa5;
+  border: none;
+  color: white;
+  border-radius: 0.5rem;
+  padding: 0 0.9rem;
+  cursor: pointer;
+}
+
+/* upload modal */
+.upload-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.upload-modal {
+  background: white;
+  padding: 1.2rem;
+  border-radius: 0.8rem;
+  width: 320px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
+}
+
+.upload-modal h3 {
+  margin-top: 0;
+  margin-bottom: 0.8rem;
+}
+
+.upload-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* responsive: en móvil que ocupe todo el ancho abajo */
+@media (max-width: 600px) {
+  .chat-widget {
+    right: 0.5rem;
+    left: 0.5rem;
+    bottom: 0.5rem;
+    width: auto;
+  }
+}

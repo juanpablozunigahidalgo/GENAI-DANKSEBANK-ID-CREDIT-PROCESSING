@@ -58,7 +58,7 @@ htmlcov/
 Thumbs.db
 
 # ====================================
-# 🧩 BUILD / DIST
+# 🧩 PYTHON BUILD / DIST
 # ====================================
 build/
 dist/
@@ -66,11 +66,37 @@ dist/
 *.egg
 
 # ====================================
-# 📦 NODE / FRONTEND
+# 💻 FRONTEND (React / Node)
 # ====================================
-node_modules/
+
+# Dependencies
+frontend/node_modules/
+
+# Build output
 frontend/build/
 frontend/dist/
+
+# Environment / local files
+frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
+
+# Cache / temporary
+frontend/.cache/
+frontend/.parcel-cache/
 frontend/.next/
 frontend/.nuxt/
-frontend/.cache/
+frontend/coverage/
+
+# Editor / debug files
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/package-lock.json
+
+# Misc
+frontend/.DS_Store
+frontend/.eslintcache
+frontend/*.local

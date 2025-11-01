@@ -1,32 +1,64 @@
 # backend/services/id_verification/denmark.py
-from typing import Dict, Any
+from typing import Dict, Any, List
+
+# Simulated CPR registry (keyed by CPR number)
+DK_CPR_REGISTRY: Dict[str, Dict[str, Any]] = {
+    "123456-7890": {
+        "firstName": "John",
+        "lastName": "Doe",
+        "dateOfBirth": "1985-04-12",
+        "gender": "male",
+        "address": "POC Street 1, 2100 Copenhagen",
+        "maritalStatus": "married",
+        "citizenship": ["Denmark"],
+    },
+    "160778-1234": {
+        "firstName": "Maria",
+        "lastName": "Larsen",
+        "dateOfBirth": "1978-07-16",
+        "gender": "female",
+        "address": "Hovedgaden 10, 8000 Aarhus",
+        "maritalStatus": "single",
+        "citizenship": ["Denmark"],
+    },
+    # add more CPRs here if needed
+}
 
 
 def verify_denmark_cpr(national_id: str) -> Dict[str, Any]:
     """
-    POC CPR check for Denmark.
-    Real version would call CPR API.
-    Here we do a deterministic mock: even → approved, odd → rejected.
+    Simulated Det Centrale Personregister (CPR) lookup.
+    GET /oplysninger/{cprNumber}
+    Returns person data if CPR exists.
     """
-    status = "rejected"
-    reason = "Not found in Danish CPR (POC)."
-    record = None
+    if not national_id:
+        return {
+            "status": "rejected",
+            "reason": "No CPR provided.",
+            "registry_record": None,
+            "source": "denmark",
+        }
 
-    if national_id:
-        last = national_id.strip()[-1]
-        if last.isdigit() and int(last) % 2 == 0:
-            status = "approved"
-            reason = "Matched Danish CPR (POC)."
-            record = {
-                "first_name": "John",
-                "last_name": "Doe",
-                "address": "POC Street 1, Copenhagen",
-                "citizenship": "Denmark",
-            }
+    cpr_number = national_id.strip()
+    person = DK_CPR_REGISTRY.get(cpr_number)
+
+    if not person:
+        return {
+            "status": "rejected",
+            "reason": f"CPR {cpr_number} not found in Danish CPR (mock).",
+            "registry_record": None,
+            "source": "denmark",
+        }
+
+    # echo back the ID and include registry data
+    registry_record = {
+        "national_id": cpr_number,
+        **person,
+    }
 
     return {
-        "status": status,
-        "reason": reason,
-        "registry_record": record,
+        "status": "approved",
+        "reason": "CPR found in Danish CPR (mock).",
+        "registry_record": registry_record,
         "source": "denmark",
     }

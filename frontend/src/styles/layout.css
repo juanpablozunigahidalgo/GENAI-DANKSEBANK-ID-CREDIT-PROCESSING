@@ -1,0 +1,28 @@
+:root {
+  --blue: #0b5fa5;
+}
+
+/* make the app fill the screen */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* wrapper div that shows ONLY the background */
+.full-bg {
+  height: 100vh;
+  width: 100vw;
+  background-image: url("../../public/desktop-background.jpg"); /* file must be in public/ */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* on mobile we switch to mobile bg */
+@media (max-width: 768px) {
+  .full-bg {
+    background-image: url("../../public/mobile-background.jpg");
+  }
+}

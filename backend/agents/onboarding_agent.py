@@ -118,6 +118,55 @@ def build_onboarding_agent(memory: ConversationBufferMemory, user_id: str) -> Ag
 
 
 # ---------------------------------------------------------------------
+# helpers
+# ---------------------------------------------------------------------
+def _normalize_name(user_data: dict) -> tuple[str, str]:
+    """
+    Try to get first/last name from multiple possible locations:
+    - snake_case from upload
+    - camelCase from upload
+    - registry record from verification
+    """
+    # 1) direct from upload (snake)
+    first = user_data.get("first_name") or user_data.get("firstName")
+    last = user_data.get("last_name") or user_data.get("lastName")
+
+    # 2) if not, try registry
+    if (not first or not last) and "verification" in user_data:
+        reg = (user_data["verification"].get("registry_record") or {})
+        first = first or reg.get("firstName") or reg.get("first_name")
+        last = last or reg.get("lastName") or reg.get("last_name")
+
+    first = (first or "").strip().lower().replace(" ", "")
+    last = (last or "").strip().lower().replace(" ", "")
+    return first, last
+
+
+def _should_finalize_from_text(text: str) -> bool:
+    """
+    Decide if the agent message looks like 'we're done'.
+    Make this looser than before.
+    """
+    text = text.lower()
+    trigger_phrases = [
+        "you are being redirected",
+        "you will be redirected",
+        "i will redirect you",
+        "redirected to our lending/credit agent",
+        "you have been registered",
+        "you're registered",
+        "estás registrado",
+        "identity has been successfully verified",
+        "identity verified",
+        "your identity has been verified",
+        "your identity has been verified and approved",
+        "id has been verified",
+        "your documents have been verified",
+    ]
+    return any(t in text for t in trigger_phrases)
+
+
+# ---------------------------------------------------------------------
 # 6) Main entrypoint called from /chat
 # ---------------------------------------------------------------------
 def run_onboarding_agent(user_query: str, user_id: str) -> str:
@@ -140,64 +189,76 @@ def run_onboarding_agent(user_query: str, user_id: str) -> str:
     output = result["output"]
     text = output.lower()
 
-    # -----------------------------------------------------------------
-    # 4) detect registration / completion phrases
-    # -----------------------------------------------------------------
-    trigger_phrases = [
-        "you are being redirected",
-        "you will be redirected",
-        "redirected to our lending/credit agent",
-        "you have been registered",
-        "you're registered",
-        "estás registrado",
-        "identity has been successfully verified",
-        "identity verified",
-    ]
+    # -------------------------------------------------------------
+    # 4) decide if we should finalize
+    #    - either the LLM said the magic words
+    #    - OR we already have a verified upload
+    # -------------------------------------------------------------
+    finalize = _should_finalize_from_text(text)
 
-    if any(t in text for t in trigger_phrases):
-        user_data = UPLOADED_IDS.get(user_id)
-        generated_email = None
+    user_data = UPLOADED_IDS.get(user_id)
+    if user_data:
+        verification = user_data.get("verification", {}) or {}
+        v_status = verification.get("status", "pending")
+        # if engine already approved → we can finalize even if LLM didn't say the phrase
+        if v_status == "approved":
+            finalize = True
 
-        if user_data:
-            # ✅ NEW: read verification result that was produced by the independent engine
-            verification = user_data.get("verification", {}) or {}
-            v_status = verification.get("status", "pending")
+    if not finalize:
+        # nothing else to do, just return model answer
+        return output
 
-            # if verification failed → DO NOT REGISTER
-            if v_status != "approved":
-                reason = verification.get("reason", "Verification not successful.")
-                # don't clear memory; let user re-upload
-                output += (
-                    f" Note: we could not verify your ID against the national registry. "
-                    f"Reason: {reason}. Please re-upload your ID or contact support."
-                )
-                return output
+    # -------------------------------------------------------------
+    # 5) we are finalizing → check uploaded/verified user
+    # -------------------------------------------------------------
+    if not user_data:
+        # edge: agent thought we were done but no ID in memory
+        output += " However, I could not find your uploaded ID. Please upload it again."
+        return output
 
-            # ✅ verification approved → proceed to registration
-            first = user_data.get("first_name", "").lower().replace(" ", "")
-            last = user_data.get("last_name", "").lower().replace(" ", "")
-            if first and last:
-                generated_email = f"{first}.{last}@danskebank.credit.com"
+    verification = user_data.get("verification", {}) or {}
+    v_status = verification.get("status", "pending")
 
-            user_data_to_save = {
-                **user_data,
-                "email": generated_email,
-                "registered_user_id": user_id,
-                "verification": verification,
-            }
-            save_customer_persistently(user_data_to_save)
+    # if verification failed → DO NOT REGISTER
+    if v_status != "approved":
+        reason = verification.get("reason", "Verification not successful.")
+        # don't clear memory; let user re-upload
+        output += (
+            f" Note: we could not verify your ID against the national registry. "
+            f"Reason: {reason}. Please re-upload your ID or contact support."
+        )
+        return output
 
-            # now we can clear memory
-            USER_MEMORIES.pop(user_id, None)
-            UPLOADED_IDS.pop(user_id, None)
+    # -------------------------------------------------------------
+    # 6) verification approved → proceed to registration
+    # -------------------------------------------------------------
+    first, last = _normalize_name(user_data)
+    generated_email = None
 
-            if generated_email:
-                output += f" Your temporary Danske Bank credit user is: {generated_email}"
-            else:
-                output += " Registration completed, but no email was generated."
+    if first and last:
+        generated_email = f"{first}.{last}@danskebank.credit.com"
+    else:
+        # fallback: generate technical email
+        generated_email = f"{user_id}@danskebank.credit.com"
 
-        else:
-            # edge: agent thought we were done but no ID in memory
-            output += " However, I could not find your uploaded ID. Please upload it again."
+    user_data_to_save = {
+        **user_data,
+        "email": generated_email,
+        "registered_user_id": user_id,
+        "verification": verification,
+    }
+    save_customer_persistently(user_data_to_save)
+
+    # now we can clear memory & uploaded data
+    USER_MEMORIES.pop(user_id, None)
+    UPLOADED_IDS.pop(user_id, None)
+
+    # -------------------------------------------------------------
+    # 7) enrich output to user
+    # -------------------------------------------------------------
+    if generated_email:
+        output += f" Your temporary Danske Bank credit user is: {generated_email}"
+    else:
+        output += " Registration completed, but no email was generated."
 
     return output
